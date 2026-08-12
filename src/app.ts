@@ -9,6 +9,10 @@ import {
   PORT,
 } from "./config.js";
 
+import authRouter from "./routes/auth.route.js";
+import { notFoundHandler } from "./middleware/notFoundHandler.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+
 const app = express();
 
 app.set("trust proxy", 1);
@@ -41,6 +45,19 @@ app.get("/api/health", (_req, res) => {
     service: "inner-flow-backend",
   });
 });
+
+// -------------------------
+// AUTH ROUTES
+// -------------------------
+
+app.use("/api/auth", authRouter);
+
+// -------------------------
+// ERROR HANDLING
+// -------------------------
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // -------------------------
 // START SERVER
