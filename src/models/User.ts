@@ -31,6 +31,19 @@ const userSchema = new Schema(
             type: [String],
             default: ["user"],
         },
+        
+        preferences: {
+            musicPreference: {
+                type: String,
+                trim: true,
+                default: null,
+            },
+
+            quieterSession: {
+                type: Boolean,
+                default: false,
+            },
+        },
     },
     {
         timestamps: {
