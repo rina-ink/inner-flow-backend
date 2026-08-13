@@ -16,6 +16,7 @@ import massageRouter from "./routes/massage.route.js";
 import availabilityRouter from "./routes/availability.route.js";
 import bookingRouter from "./routes/booking.route.js";
 import blogRouter from "./routes/blog.route.js";
+import memberRouter from "./routes/member.route.js";
 
 const app = express();
 
@@ -79,6 +80,12 @@ app.use("/api/bookings", bookingRouter);
 // -------------------------
 
 app.use("/api/blog", blogRouter);
+
+// -------------------------
+// MEMBER ROUTES
+// -------------------------
+
+app.use("/api/members", memberRouter);
 
 // -------------------------
 // ERROR HANDLING
