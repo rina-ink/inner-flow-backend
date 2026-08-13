@@ -12,6 +12,7 @@ import {
 import authRouter from "./routes/auth.route.js";
 import { notFoundHandler } from "./middleware/notFoundHandler.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import massageRouter from "./routes/massage.route.js";
 
 const app = express();
 
@@ -51,6 +52,12 @@ app.get("/api/health", (_req, res) => {
 // -------------------------
 
 app.use("/api/auth", authRouter);
+
+// -------------------------
+// MASSAGE ROUTES
+// -------------------------
+
+app.use("/api/massages", massageRouter);
 
 // -------------------------
 // ERROR HANDLING
