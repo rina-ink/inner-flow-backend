@@ -15,6 +15,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import massageRouter from "./routes/massage.route.js";
 import availabilityRouter from "./routes/availability.route.js";
 import bookingRouter from "./routes/booking.route.js";
+import blogRouter from "./routes/blog.route.js";
 
 const app = express();
 
@@ -72,6 +73,12 @@ app.use("/api/availability", availabilityRouter);
 // -------------------------
 
 app.use("/api/bookings", bookingRouter);
+
+// -------------------------
+// BLOG ROUTES
+// -------------------------
+
+app.use("/api/blog", blogRouter);
 
 // -------------------------
 // ERROR HANDLING
