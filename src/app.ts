@@ -14,6 +14,7 @@ import { notFoundHandler } from "./middleware/notFoundHandler.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import massageRouter from "./routes/massage.route.js";
 import availabilityRouter from "./routes/availability.route.js";
+import bookingRouter from "./routes/booking.route.js";
 
 const app = express();
 
@@ -65,6 +66,12 @@ app.use("/api/massages", massageRouter);
 // -------------------------
 
 app.use("/api/availability", availabilityRouter);
+
+// -------------------------
+// BOOKING ROUTES
+// -------------------------
+
+app.use("/api/bookings", bookingRouter);
 
 // -------------------------
 // ERROR HANDLING
