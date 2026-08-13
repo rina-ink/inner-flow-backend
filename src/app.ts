@@ -13,6 +13,7 @@ import authRouter from "./routes/auth.route.js";
 import { notFoundHandler } from "./middleware/notFoundHandler.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import massageRouter from "./routes/massage.route.js";
+import availabilityRouter from "./routes/availability.route.js";
 
 const app = express();
 
@@ -58,6 +59,12 @@ app.use("/api/auth", authRouter);
 // -------------------------
 
 app.use("/api/massages", massageRouter);
+
+// -------------------------
+// AVAILABILITY ROUTES
+// -------------------------
+
+app.use("/api/availability", availabilityRouter);
 
 // -------------------------
 // ERROR HANDLING
