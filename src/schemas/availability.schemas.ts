@@ -6,6 +6,17 @@ const timeSchema = z
         error: "Time must be in HH:MM format",
     });
 
+const isStartBeforeEnd = (
+    startTime?: string,
+    endTime?: string,
+) => {
+    if (!startTime || !endTime) {
+        return true;
+    }
+
+    return startTime < endTime;
+};
+
 const weeklyAvailabilitySchema = z
     .object({
         type: z.literal("weekly"),
@@ -29,6 +40,17 @@ const weeklyAvailabilitySchema = z
         {
             error:
             "Available days must include startTime and endTime",
+        },
+    )
+    .refine(
+        (data) =>
+            isStartBeforeEnd(
+                data.startTime,
+                data.endTime,
+            ),
+        {
+            error:
+            "startTime must be earlier than endTime",
         },
     );
 

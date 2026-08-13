@@ -44,7 +44,22 @@ export const createBookingSchema = z
 
         massageId: objectIdSchema,
 
-        date: z.iso.date(),
+        date: z
+            .iso
+            .date()
+            .refine(
+                (date) => {
+                    const today = new Date();
+                    const requestedDate = new Date(`${date}T00:00:00`);
+                    
+                    today.setHours(0, 0, 0, 0);
+                    
+                    return requestedDate >= today;
+                },
+                {
+                    error: "Booking date cannot be in the past",
+                },
+            ),
 
         startTime: timeSchema,
 

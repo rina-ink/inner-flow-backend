@@ -31,7 +31,20 @@ export const errorHandler: ErrorRequestHandler = (
         });
     }
 
-    // 3. errors intentionally thrown
+    // 3. malformed JSON body
+    if (
+        err instanceof SyntaxError &&
+        "status" in err &&
+        err.status === 400 &&
+        "body" in err
+    ) {
+        return res.status(400).json({
+            status: "error",
+            message: "Invalid JSON",
+        });
+    }
+
+    // 4. errors intentionally thrown
     if (err instanceof HttpError) {
         return res.status(err.statusCode).json({
             status: "error",
@@ -39,7 +52,7 @@ export const errorHandler: ErrorRequestHandler = (
         });
     }
 
-    // 4. unexpected errors
+    // 5. unexpected errors
     console.error("Unexpected error:", err);
     
     res.status(500).json({
