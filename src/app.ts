@@ -9,6 +9,15 @@ import {
   PORT,
 } from "./config.js";
 
+import authRouter from "./routes/auth.route.js";
+import { notFoundHandler } from "./middleware/notFoundHandler.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import massageRouter from "./routes/massage.route.js";
+import availabilityRouter from "./routes/availability.route.js";
+import bookingRouter from "./routes/booking.route.js";
+import blogRouter from "./routes/blog.route.js";
+import memberRouter from "./routes/member.route.js";
+
 const app = express();
 
 app.set("trust proxy", 1);
@@ -41,6 +50,49 @@ app.get("/api/health", (_req, res) => {
     service: "inner-flow-backend",
   });
 });
+
+// -------------------------
+// AUTH ROUTES
+// -------------------------
+
+app.use("/api/auth", authRouter);
+
+// -------------------------
+// MASSAGE ROUTES
+// -------------------------
+
+app.use("/api/massages", massageRouter);
+
+// -------------------------
+// AVAILABILITY ROUTES
+// -------------------------
+
+app.use("/api/availability", availabilityRouter);
+
+// -------------------------
+// BOOKING ROUTES
+// -------------------------
+
+app.use("/api/bookings", bookingRouter);
+
+// -------------------------
+// BLOG ROUTES
+// -------------------------
+
+app.use("/api/blog", blogRouter);
+
+// -------------------------
+// MEMBER ROUTES
+// -------------------------
+
+app.use("/api/members", memberRouter);
+
+// -------------------------
+// ERROR HANDLING
+// -------------------------
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // -------------------------
 // START SERVER
