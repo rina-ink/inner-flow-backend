@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
     getAvailability,
     getAvailabilityByDate,
+    getAvailableSlots,
     createAvailability,
     updateAvailability,
     deleteAvailability,
@@ -26,6 +27,11 @@ availabilityRouter.get("/", getAvailability);
 availabilityRouter.get(
     "/date/:date",
     getAvailabilityByDate,
+);
+
+availabilityRouter.get(
+    "/slots",
+    getAvailableSlots,
 );
 
 // ==============================
