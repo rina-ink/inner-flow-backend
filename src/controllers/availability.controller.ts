@@ -2,12 +2,45 @@ import type { RequestHandler } from "express";
 import z from "zod";
 
 import Availability from "../models/Availability.js";
+import Booking from "../models/Booking.js";
+
 import { createAvailabilitySchema } from "../schemas/availability.schemas.js";
 import { HttpError } from "../utils/httpError.js";
 
 type CreateAvailabilityBody = z.infer<
     typeof createAvailabilitySchema
 >;
+
+// --------------------------------
+// TIME HELPERS
+// --------------------------------
+
+const timeToMinutes = (time: string): number => {
+    const [hours, minutes] = time
+        .split(":")
+        .map(Number);
+
+    return hours! * 60 + minutes!;
+};
+
+const minutesToTime = (
+    totalMinutes: number,
+): string => {
+    const hours = Math.floor(
+        totalMinutes / 60,
+    );
+
+    const minutes =
+        totalMinutes % 60;
+
+    return `${String(hours).padStart(
+        2,
+        "0",
+    )}:${String(minutes).padStart(
+        2,
+        "0",
+    )}`;
+};
 
 // ==============================
 // GET ALL AVAILABILITY
@@ -102,6 +135,178 @@ export const getAvailabilityByDate: RequestHandler = async (
             isAvailable: weekly.isAvailable,
             startTime: weekly.startTime,
             endTime: weekly.endTime,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ==============================
+// GET AVAILABLE SLOTS
+// ==============================
+
+export const getAvailableSlots: RequestHandler = async (
+    req,
+    res,
+    next,
+) => {
+    try {
+        const { date, duration } = req.query;
+
+        // 1. Validate query parameters
+
+        if (
+            typeof date !== "string" ||
+            typeof duration !== "string"
+        ) {
+            throw new HttpError(
+                400,
+                "Date and duration are required",
+            );
+        }
+
+        const parsedDuration =
+            Number(duration);
+
+        if (
+            !Number.isInteger(parsedDuration) ||
+            parsedDuration <= 0
+        ) {
+            throw new HttpError(
+                400,
+                "Invalid duration",
+            );
+        }
+
+        const parsedDate = new Date(
+            `${date}T00:00:00`,
+        );
+
+        if (
+            Number.isNaN(
+                parsedDate.getTime(),
+            )
+        ) {
+            throw new HttpError(
+                400,
+                "Invalid date",
+            );
+        }
+
+        // 2. Determine effective availability
+
+        const dayOfWeek =
+            parsedDate.getDay();
+
+        const exception =
+            await Availability.findOne({
+                type: "exception",
+                date,
+            }).lean();
+
+        const availability =
+            exception ??
+            (await Availability.findOne({
+                type: "weekly",
+                dayOfWeek,
+            }).lean());
+
+        if (
+            !availability ||
+            !availability.isAvailable
+        ) {
+            return res.status(200).json({
+                date,
+                duration: parsedDuration,
+                slots: [],
+            });
+        }
+
+        if (
+            !availability.startTime ||
+            !availability.endTime
+        ) {
+            throw new HttpError(
+                400,
+                "Availability hours are not configured for this date",
+            );
+        }
+
+        // 3. Load bookings that can block slots
+
+        const existingBookings =
+            await Booking.find({
+                date,
+                status: {
+                    $ne: "cancelled",
+                },
+            }).lean();
+
+        // 4. Convert availability to minutes
+
+        const availableStart =
+            timeToMinutes(
+                availability.startTime,
+            );
+
+        const availableEnd =
+            timeToMinutes(
+                availability.endTime,
+            );
+
+        const slots: string[] = [];
+
+        // 5. Generate candidates every 30 minutes
+
+        for (
+            let candidateStart =
+                availableStart;
+            candidateStart +
+                parsedDuration <=
+            availableEnd;
+            candidateStart += 30
+        ) {
+            const candidateEnd =
+                candidateStart +
+                parsedDuration;
+
+            // Same overlap rule used by createBooking
+            const hasConflict =
+                existingBookings.some(
+                    (booking) => {
+                        const existingStart =
+                            timeToMinutes(
+                                booking.startTime,
+                            );
+
+                        const existingEnd =
+                            existingStart +
+                            booking.duration;
+
+                        return (
+                            candidateStart <
+                                existingEnd &&
+                            candidateEnd >
+                                existingStart
+                        );
+                    },
+                );
+
+            if (!hasConflict) {
+                slots.push(
+                    minutesToTime(
+                        candidateStart,
+                    ),
+                );
+            }
+        }
+
+        // 6. Return only free slots
+
+        res.status(200).json({
+            date,
+            duration: parsedDuration,
+            slots,
         });
     } catch (error) {
         next(error);
