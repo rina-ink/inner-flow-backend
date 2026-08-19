@@ -33,14 +33,14 @@ type LoginBody = z.infer<typeof loginSchema>;
 
 const ACCESS_COOKIE_OPTIONS = {
     httpOnly: true,
-    sameSite: "strict" as const,
+    sameSite: isProduction ? "none" as const : "strict" as const,
     secure: isProduction,
     maxAge: 15 * 60 * 1000,
 };
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,  // stops XSS attacks
-    sameSite: "strict" as const,  // stops CSRF attacks
+    sameSite: isProduction ? "none" as const : "strict" as const,
     secure: isProduction,
     maxAge: REFRESH_TOKEN_TTL * 1000,
 };
